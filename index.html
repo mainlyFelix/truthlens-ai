@@ -550,7 +550,7 @@ nav{position:sticky;top:0;z-index:100;background:var(--nav-bg);backdrop-filter:b
 <div class="toast" id="toast"></div>
 
 <script>
-const BACKEND='http://localhost:5001';
+const BACKEND='https://voidfelix-truthlens-api.hf.space';
 let hist=[],stats={total:0,real:0,fake:0,unsure:0};
 let currentResult=null,detectedMode='text';
 let chScore=0,chTotal=0,chAnswered=false,chIdx=0,tipIdx=0;
@@ -894,3 +894,4 @@ function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/<
 </script>
 </body>
 </html>
+
