@@ -1,6 +1,6 @@
 flask
 flask-cors
-transformers
-torch
+anthropic
 beautifulsoup4
 requests
+gunicorn
