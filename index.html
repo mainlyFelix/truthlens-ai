@@ -362,13 +362,13 @@ nav{position:sticky;top:0;z-index:100;background:var(--nav-bg);backdrop-filter:b
 
 <div class="ticker">
   <div class="ticker-inner">
-    <div class="ticker-item">Powered by RoBERTa</div>
+    <div class="ticker-item">Powered by Claude AI</div>
     <div class="ticker-item">Cross-source verification</div>
     <div class="ticker-item">Paste text or drop a URL</div>
     <div class="ticker-item">Check before you share</div>
     <div class="ticker-item">Decision factors explained</div>
     <div class="ticker-item">Live headlines included</div>
-    <div class="ticker-item">Powered by RoBERTa</div>
+    <div class="ticker-item">Powered by Claude AI</div>
     <div class="ticker-item">Cross-source verification</div>
     <div class="ticker-item">Paste text or drop a URL</div>
     <div class="ticker-item">Check before you share</div>
@@ -541,7 +541,7 @@ nav{position:sticky;top:0;z-index:100;background:var(--nav-bg);backdrop-filter:b
 
   <div class="footer-bar">
     <span>TruthLens · AI Fact Checker</span>
-    <span class="model-tag">RoBERTa</span>
+    <span class="model-tag">Claude AI</span>
     <span id="footer-status">—</span>
   </div>
 
@@ -550,7 +550,7 @@ nav{position:sticky;top:0;z-index:100;background:var(--nav-bg);backdrop-filter:b
 <div class="toast" id="toast"></div>
 
 <script>
-const BACKEND='https://voidfelix-truthlens-api.hf.space';
+const BACKEND='https://YOUR-APP-NAME.onrender.com'; // ← Replace with your Render URL after deploying
 let hist=[],stats={total:0,real:0,fake:0,unsure:0};
 let currentResult=null,detectedMode='text';
 let chScore=0,chTotal=0,chAnswered=false,chIdx=0,tipIdx=0;
@@ -631,10 +631,10 @@ function tryAnother(){
 
 // Analyze
 const scanSteps=[
-  ['TOKENIZING','Breaking text into tokens'],
-  ['RUNNING MODEL','Applying transformer layers'],
-  ['SCORING','Computing confidence score'],
-  ['VERIFYING','Cross-checking sources'],
+  ['READING','Processing your content'],
+  ['ANALYZING','Checking facts and patterns'],
+  ['REASONING','Evaluating credibility signals'],
+  ['VERIFYING','Generating verdict'],
 ];
 async function analyze(){
   const val=document.getElementById('main-input').value.trim();
@@ -676,9 +676,11 @@ async function analyze(){
 
 // Verdict
 const vcfg={
-  real:{glyph:'✅',lbl:'Verdict · Authentic',ttl:'Likely Real',dsc:'This content shows characteristics consistent with credible, fact-based reporting. Always verify with primary sources before sharing.',cls:'real'},
-  fake:{glyph:'🚨',lbl:'Verdict · Misinformation',ttl:'Likely Fake',dsc:'Multiple red flags detected. This content exhibits patterns strongly associated with misinformation or misleading narratives.',cls:'fake'},
-  inconclusive:{glyph:'🤔',lbl:'Verdict · Uncertain',ttl:'Inconclusive',dsc:"Mixed signals — the model isn't confident. Independently verify this content before forming conclusions.",cls:'inconclusive'},
+  real:       {glyph:'✅',lbl:'Verdict · Authentic',   ttl:'Likely Real',    cls:'real'},
+  fake:       {glyph:'🚨',lbl:'Verdict · Misinformation',ttl:'Likely Fake',  cls:'fake'},
+  misleading: {glyph:'⚠️',lbl:'Verdict · Misleading',  ttl:'Misleading',     cls:'inconclusive'},
+  satire:     {glyph:'🎭',lbl:'Verdict · Satire',       ttl:'Satire / Parody',cls:'inconclusive'},
+  inconclusive:{glyph:'🤔',lbl:'Verdict · Uncertain',  ttl:'Inconclusive',   cls:'inconclusive'},
 };
 function showResult(data,inputText){
   const v=data.verdict||'inconclusive';
@@ -687,13 +689,17 @@ function showResult(data,inputText){
   document.getElementById('verdict-glyph').textContent=cfg.glyph;
   document.getElementById('verdict-lbl').textContent=cfg.lbl;
   document.getElementById('verdict-ttl').textContent=cfg.ttl;
-  document.getElementById('verdict-dsc').textContent=cfg.dsc;
+  // Use Claude's actual reasoning as the description
+  document.getElementById('verdict-dsc').textContent=data.reasoning||"Verify with primary sources before sharing.";
   document.getElementById('conf-pct').textContent=data.confidence+'%';
   const bar=document.getElementById('conf-bar');
   bar.style.width='0%';
   requestAnimationFrame(()=>requestAnimationFrame(()=>{bar.style.width=data.confidence+'%';}));
 
-  const claims=extractClaims(inputText);
+  // Use Claude's red_flags as claims if available, else extract from text
+  const claims = (data.red_flags && data.red_flags.length > 0)
+    ? data.red_flags
+    : extractClaims(inputText);
   document.getElementById('claims-badge').textContent=claims.length;
   document.getElementById('claims-list').innerHTML=claims.map((c,i)=>
     `<div class="claim-row"><span class="claim-idx">${i+1}</span><span class="claim-txt">${esc(c)}</span></div>`
@@ -771,7 +777,9 @@ function makeSources(conf,v){
 // Stats
 function updateStats(v){
   stats.total++;
-  if(v==='real')stats.real++;else if(v==='fake')stats.fake++;else stats.unsure++;
+  if(v==='real')stats.real++;
+  else if(v==='fake')stats.fake++;
+  else stats.unsure++; // misleading, satire, inconclusive all count as unsure
   document.getElementById('st-total').textContent=stats.total;
   document.getElementById('st-real').textContent=stats.real;
   document.getElementById('st-fake').textContent=stats.fake;
@@ -791,7 +799,7 @@ function addHist(data,text){hist.unshift({data,text:text.slice(0,90)});if(hist.l
 function renderHist(){
   const el=document.getElementById('hist-grid');
   if(!hist.length){el.innerHTML=`<div class="hist-empty"><div class="hist-empty-icon">🔍</div>Your analysis history will appear here.</div>`;return;}
-  const vl={real:['g','REAL ✓'],fake:['r','FAKE ✗'],inconclusive:['o','UNSURE ?']};
+  const vl={real:['g','REAL ✓'],fake:['r','FAKE ✗'],misleading:['o','MISLEADING'],satire:['o','SATIRE'],inconclusive:['o','UNSURE ?']};
   el.innerHTML=hist.map((h,i)=>{
     const[cls,lbl]=vl[h.data.verdict]||['o','?'];
     return`<div class="hist-item" onclick="replayHist(${i})"><div class="hist-verdict ${cls}">${lbl}</div><div class="hist-preview">${esc(h.text)}</div><div class="hist-conf">${h.data.confidence}% confidence</div></div>`;
@@ -803,7 +811,7 @@ function clearHistory(){hist=[];renderHist();}
 // Copy
 function copyResult(){
   if(!currentResult)return;
-  const labels={real:'✅ LIKELY REAL',fake:'🚨 LIKELY FAKE',inconclusive:'🤔 INCONCLUSIVE'};
+  const labels={real:'✅ LIKELY REAL',fake:'🚨 LIKELY FAKE',misleading:'⚠️ MISLEADING',satire:'🎭 SATIRE',inconclusive:'🤔 INCONCLUSIVE'};
   navigator.clipboard.writeText(`TruthLens · Fact Check\n${labels[currentResult.verdict]}\nConfidence: ${currentResult.confidence}%\n\n"${currentResult.text.slice(0,100)}..."`).then(()=>showToast('✓ Copied to clipboard'));
 }
 function showToast(msg){
@@ -894,4 +902,3 @@ function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/<
 </script>
 </body>
 </html>
-
