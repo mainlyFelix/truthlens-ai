@@ -1,21 +1,44 @@
 import os
+import json
 import requests
 from bs4 import BeautifulSoup
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from transformers import pipeline
+import anthropic
 
 app = Flask(__name__)
 CORS(app)
 
-print("Initializing AI... Downloading robust RoBERTa model. Patience.")
-try:
-    # Upgrading to a highly generalized, multi-source fine-tuned model
-    # to severely reduce formatting and keyword bias.
-    classifier = pipeline("text-classification", model="hamzab/roberta-fake-news-classification")
-    print("Model loaded successfully. Server is ready.")
-except Exception as e:
-    print(f"Error loading model: {e}")
+client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
+
+SYSTEM_PROMPT = """You are an expert fact-checker and media literacy analyst. Your job is to assess whether a piece of text is likely real/credible news or fake/misleading content.
+
+Analyze the provided text and respond with ONLY a valid JSON object in this exact format:
+{
+  "verdict": "real" | "fake" | "misleading" | "satire" | "inconclusive",
+  "confidence": <integer 0-100>,
+  "reasoning": "<2-3 sentence explanation of your verdict>",
+  "red_flags": ["<flag1>", "<flag2>"] 
+}
+
+Verdict definitions:
+- "real": Credible, factual reporting with verifiable claims and neutral tone
+- "fake": Demonstrably false claims, fabricated events, or deliberate misinformation
+- "misleading": Contains true elements but framed deceptively, uses selective facts, or has clickbait framing
+- "satire": Clearly satirical or parody content not intended to be taken literally
+- "inconclusive": Not enough information to make a determination
+
+Red flags to look for (include only those that apply, can be empty list):
+- Sensationalist/emotional language
+- Vague or missing sources
+- Implausible claims
+- Conspiracy framing
+- Clickbait headline patterns
+- Logical fallacies
+- Known misinformation narratives
+
+Be fair and balanced. Mainstream news, even if you disagree with its framing, should not be marked fake without strong reason. 
+Only respond with the JSON object, no other text."""
 
 
 def extract_text_from_url(url):
@@ -34,7 +57,7 @@ def extract_text_from_url(url):
 
 @app.route('/health', methods=['GET'])
 def health_check():
-    return jsonify({"status": "online"}), 200
+    return jsonify({"status": "online", "model": "claude-sonnet-4-20250514"}), 200
 
 
 @app.route('/analyze', methods=['POST'])
@@ -44,8 +67,11 @@ def analyze_content():
         return jsonify({"error": "No payload provided."}), 400
 
     content = ""
+    source_url = None
+
     if 'url' in data:
-        content = extract_text_from_url(data['url'])
+        source_url = data['url']
+        content = extract_text_from_url(source_url)
         if not content:
             return jsonify({"error": "Could not extract text from the provided URL."}), 400
     elif 'text' in data:
@@ -56,31 +82,46 @@ def analyze_content():
     if len(content) < 15:
         return jsonify({"error": "Content too short for accurate analysis."}), 400
 
-    truncated_content = content[:2500]
+    # Truncate to ~3000 words to stay within token limits
+    truncated_content = content[:4000]
 
     try:
-        # Run inference
-        prediction = classifier(truncated_content)[0]
-        label = prediction['label'].lower()
-        confidence = round(prediction['score'] * 100)
+        message = client.messages.create(
+            model="claude-sonnet-4-20250514",
+            max_tokens=600,
+            system=SYSTEM_PROMPT,
+            messages=[
+                {
+                    "role": "user",
+                    "content": f"Please analyze this content:\n\n{truncated_content}"
+                }
+            ]
+        )
 
-        # For this model: LABEL_0 is Fake, LABEL_1 is Real
-        if "0" in label or "fake" in label:
-            verdict = "fake"
-        elif "1" in label or "real" in label or "true" in label:
-            verdict = "real"
-        else:
-            verdict = "inconclusive"
+        import json
+        response_text = message.content[0].text.strip()
+        # Strip markdown code blocks if present
+        if response_text.startswith("```"):
+            response_text = response_text.split("```")[1]
+            if response_text.startswith("json"):
+                response_text = response_text[4:]
+        result = json.loads(response_text)
 
         return jsonify({
-            "verdict": verdict,
-            "confidence": confidence,
-            "text_preview": content[:150] + "..." if len(content) > 150 else content
+            "verdict": result.get("verdict", "inconclusive"),
+            "confidence": result.get("confidence", 0),
+            "reasoning": result.get("reasoning", ""),
+            "red_flags": result.get("red_flags", []),
+            "text_preview": content[:150] + "..." if len(content) > 150 else content,
+            "source_url": source_url
         }), 200
 
+    except json.JSONDecodeError as e:
+        return jsonify({"error": f"Failed to parse AI response: {str(e)}"}), 500
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5001)
+    port = int(os.environ.get("PORT", 5001))
+    app.run(host='0.0.0.0', port=port, debug=False)
