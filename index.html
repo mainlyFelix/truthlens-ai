@@ -333,7 +333,48 @@ nav{position:sticky;top:0;z-index:100;background:var(--nav-bg);backdrop-filter:b
   .hist-grid{grid-template-columns:1fr 1fr}
   .hist-empty{grid-column:span 2}
   .hero-title{font-size:36px}
+  .about-grid{grid-template-columns:1fr!important}
+  .about-stats{grid-template-columns:1fr 1fr!important}
 }
+
+/* ABOUT MODAL */
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(12px);z-index:500;opacity:0;pointer-events:none;transition:opacity .35s}
+.modal-backdrop.show{opacity:1;pointer-events:all}
+[data-theme="light"] .modal-backdrop{background:rgba(0,0,0,.45)}
+.about-modal{position:fixed;top:50%;left:50%;transform:translate(-50%,-46%);width:min(820px,94vw);max-height:88vh;overflow-y:auto;z-index:501;background:var(--surface);border:1px solid var(--border-hover);border-radius:24px;box-shadow:0 32px 80px rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .35s,transform .35s;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+.about-modal.show{opacity:1;pointer-events:all;transform:translate(-50%,-50%)}
+.am-hero{padding:48px 44px 36px;background:linear-gradient(135deg,rgba(93,123,255,.12) 0%,rgba(123,95,255,.08) 50%,transparent 100%);border-bottom:1px solid var(--border);position:relative;overflow:hidden}
+.am-hero::before{content:'';position:absolute;top:-60px;right:-60px;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle,rgba(93,123,255,.15),transparent 70%);pointer-events:none}
+.am-eyebrow{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);margin-bottom:14px}
+.am-title{font-family:'Instrument Serif',serif;font-size:clamp(28px,4vw,42px);font-weight:400;letter-spacing:-.03em;line-height:1.1;margin-bottom:16px}
+.am-title em{font-style:italic;color:var(--fake)}
+.am-lead{font-size:14px;color:var(--muted-2);line-height:1.75;max-width:560px}
+.am-close{position:absolute;top:20px;right:20px;width:36px;height:36px;border-radius:50%;background:var(--surface-2);border:1px solid var(--border);color:var(--muted-2);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;font-family:sans-serif}
+.am-close:hover{background:var(--fake-dim);border-color:var(--fake);color:var(--fake)}
+.am-body{padding:36px 44px 44px}
+.am-section{margin-bottom:36px}
+.am-section:last-child{margin-bottom:0}
+.am-section-title{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--accent);margin-bottom:18px;display:flex;align-items:center;gap:10px}
+.am-section-title::after{content:'';flex:1;height:1px;background:var(--border)}
+.about-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:28px}
+.astat{background:var(--input-bg);border:1px solid var(--border);border-radius:var(--r-sm);padding:20px 16px;text-align:center}
+.astat-n{font-family:'Instrument Serif',serif;font-size:36px;font-weight:400;letter-spacing:-.04em;line-height:1}
+.astat-n.red{color:var(--fake)}.astat-n.warn{color:var(--warn)}.astat-n.blue{color:var(--accent)}
+.astat-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-top:6px;line-height:1.4}
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.agrid-card{background:var(--input-bg);border:1px solid var(--border);border-radius:var(--r-sm);padding:20px}
+.agrid-card:hover{border-color:var(--border-hover)}
+.agrid-icon{font-size:26px;margin-bottom:10px}
+.agrid-title{font-size:13px;font-weight:700;letter-spacing:.02em;margin-bottom:8px}
+.agrid-txt{font-size:12px;color:var(--muted-2);line-height:1.65}
+.am-quote{background:var(--accent-dim);border-left:3px solid var(--accent);border-radius:0 var(--r-sm) var(--r-sm) 0;padding:18px 20px;margin:20px 0}
+.am-quote p{font-family:'Instrument Serif',serif;font-size:15px;font-style:italic;color:var(--text);line-height:1.65}
+.am-quote cite{display:block;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-top:8px;font-style:normal;letter-spacing:.08em}
+.am-mission{background:linear-gradient(135deg,rgba(93,123,255,.1),rgba(123,95,255,.08));border:1px solid rgba(93,123,255,.2);border-radius:var(--r);padding:24px;margin-top:8px}
+.am-mission p{font-size:13px;color:var(--muted-2);line-height:1.8}
+.am-mission strong{color:var(--text)}
+.am-cta{display:inline-flex;align-items:center;gap:8px;margin-top:20px;padding:12px 24px;background:linear-gradient(135deg,var(--accent),#7b5fff);color:#fff;border:none;border-radius:100px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;letter-spacing:.03em;cursor:pointer;transition:all .25s}
+.am-cta:hover{box-shadow:0 8px 28px rgba(93,123,255,.4);transform:translateY(-2px)}
 </style>
 </head>
 <body>
@@ -343,9 +384,9 @@ nav{position:sticky;top:0;z-index:100;background:var(--nav-bg);backdrop-filter:b
     <span class="logo-truth">Truth</span><span class="logo-lens">Lens</span><span class="logo-dot"></span>
   </div>
   <div class="nav-center">
-    <div class="nav-pill active">Analyze</div>
-    <div class="nav-pill">History</div>
-    <div class="nav-pill">About</div>
+    <div class="nav-pill active" onclick="navTo('analyze')">Analyze</div>
+    <div class="nav-pill" onclick="navTo('history')">History</div>
+    <div class="nav-pill" onclick="navTo('about')">About</div>
   </div>
   <div class="nav-right">
     <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme" aria-label="Toggle light/dark mode">
@@ -362,13 +403,13 @@ nav{position:sticky;top:0;z-index:100;background:var(--nav-bg);backdrop-filter:b
 
 <div class="ticker">
   <div class="ticker-inner">
-    <div class="ticker-item">Powered by Claude AI</div>
+    <div class="ticker-item">Powered by AI</div>
     <div class="ticker-item">Cross-source verification</div>
     <div class="ticker-item">Paste text or drop a URL</div>
     <div class="ticker-item">Check before you share</div>
     <div class="ticker-item">Decision factors explained</div>
     <div class="ticker-item">Live headlines included</div>
-    <div class="ticker-item">Powered by Claude AI</div>
+    <div class="ticker-item">Powered by AI</div>
     <div class="ticker-item">Cross-source verification</div>
     <div class="ticker-item">Paste text or drop a URL</div>
     <div class="ticker-item">Check before you share</div>
@@ -526,7 +567,7 @@ nav{position:sticky;top:0;z-index:100;background:var(--nav-bg);backdrop-filter:b
 
   </div>
 
-  <div class="history-wrap">
+  <div class="history-wrap" id="history-wrap">
     <div class="history-head">
       <div class="history-h">Recent checks</div>
       <button class="history-clr" onclick="clearHistory()">Clear all</button>
@@ -541,10 +582,87 @@ nav{position:sticky;top:0;z-index:100;background:var(--nav-bg);backdrop-filter:b
 
   <div class="footer-bar">
     <span>TruthLens · AI Fact Checker</span>
-    <span class="model-tag">Claude AI</span>
+    <span class="model-tag">AI Engine</span>
     <span id="footer-status">—</span>
   </div>
 
+</div>
+
+<!-- ABOUT MODAL -->
+<div class="modal-backdrop" id="about-backdrop" onclick="closeAbout()"></div>
+<div class="about-modal" id="about-modal">
+  <div class="am-hero">
+    <button class="am-close" onclick="closeAbout()">✕</button>
+    <div class="am-eyebrow">◈ Why TruthLens Exists</div>
+    <h2 class="am-title">The world has a <em>fake news</em> crisis.</h2>
+    <p class="am-lead">Misinformation spreads faster than truth, erodes trust in institutions, and has real-world consequences — from election interference to public health disasters. TruthLens was built to fight back.</p>
+  </div>
+  <div class="am-body">
+
+    <div class="am-section">
+      <div class="am-section-title">The scale of the problem</div>
+      <div class="about-stats">
+        <div class="astat"><div class="astat-n red">6×</div><div class="astat-lbl">Faster than truth — how quickly false stories spread on social media</div></div>
+        <div class="astat"><div class="astat-n warn">86%</div><div class="astat-lbl">Of people have shared misinformation without realising it</div></div>
+        <div class="astat"><div class="astat-n blue">$78B</div><div class="astat-lbl">Annual estimated economic damage from misinformation worldwide</div></div>
+      </div>
+    </div>
+
+    <div class="am-section">
+      <div class="am-section-title">Real-world consequences</div>
+      <div class="about-grid">
+        <div class="agrid-card">
+          <div class="agrid-icon">🏥</div>
+          <div class="agrid-title">Public Health</div>
+          <div class="agrid-txt">Vaccine misinformation contributed to measles outbreaks in regions where the disease had been effectively eliminated. During COVID-19, false cures and conspiracy theories led to preventable deaths and overwhelmed healthcare systems.</div>
+        </div>
+        <div class="agrid-card">
+          <div class="agrid-icon">🗳️</div>
+          <div class="agrid-title">Democracy & Elections</div>
+          <div class="agrid-txt">Coordinated disinformation campaigns have influenced elections across multiple continents. Fabricated quotes, deepfakes, and bot-amplified lies undermine the public's ability to make informed political choices.</div>
+        </div>
+        <div class="agrid-card">
+          <div class="agrid-icon">📉</div>
+          <div class="agrid-title">Financial Markets</div>
+          <div class="agrid-txt">A single fake tweet claiming a company's CEO had died once wiped out billions in market value within minutes. Financial misinformation is weaponised for market manipulation and fraud at scale.</div>
+        </div>
+        <div class="agrid-card">
+          <div class="agrid-icon">🔥</div>
+          <div class="agrid-title">Violence & Conflict</div>
+          <div class="agrid-txt">False rumours spread via social media have incited mob violence in multiple countries. In some cases, fake news about ethnic or religious groups has directly fuelled deadly riots and pogroms.</div>
+        </div>
+      </div>
+      <div class="am-quote">
+        <p>"A lie can travel halfway around the world while the truth is still putting on its shoes."</p>
+        <cite>— Often attributed to Mark Twain · Reflects the timeless asymmetry of truth vs. falsehood</cite>
+      </div>
+    </div>
+
+    <div class="am-section">
+      <div class="am-section-title">Why it keeps spreading</div>
+      <div class="agrid-card" style="margin-bottom:12px">
+        <div class="agrid-icon">🧠</div>
+        <div class="agrid-title">Our brains are wired to be fooled</div>
+        <div class="agrid-txt">False headlines generate more emotional reactions than accurate ones — outrage, fear, and surprise make us share before we think. Algorithms amplify this, pushing sensational content because it drives engagement. By the time a correction is issued, the original lie has already reached millions.</div>
+      </div>
+      <div class="agrid-card">
+        <div class="agrid-icon">⚙️</div>
+        <div class="agrid-title">The infrastructure of deception</div>
+        <div class="agrid-txt">Fake news is no longer just sloppy journalism — it's an industry. AI-generated articles, coordinated bot networks, cloned news websites, and paid troll farms operate around the clock to manufacture and amplify false narratives for political, financial, or ideological gain.</div>
+      </div>
+    </div>
+
+    <div class="am-section">
+      <div class="am-section-title">Enter TruthLens</div>
+      <div class="am-mission">
+        <p>TruthLens was created with a single mission: <strong>make truth verification fast, accessible, and free for everyone.</strong></p>
+        <p style="margin-top:12px">We believe that an informed public is the strongest defence against misinformation. By combining <strong>AI-powered fact analysis</strong>, <strong>cross-source verification</strong>, and <strong>transparent reasoning</strong>, TruthLens helps you understand not just <em>what</em> a verdict is — but <em>why</em>.</p>
+        <p style="margin-top:12px">We don't tell you what to think. We give you the tools to think for yourself, backed by evidence.</p>
+      </div>
+      <button class="am-cta" onclick="closeAbout()">⚡ Start Fact-Checking Now</button>
+    </div>
+
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -689,14 +807,12 @@ function showResult(data,inputText){
   document.getElementById('verdict-glyph').textContent=cfg.glyph;
   document.getElementById('verdict-lbl').textContent=cfg.lbl;
   document.getElementById('verdict-ttl').textContent=cfg.ttl;
-  // Use Claude's actual reasoning as the description
   document.getElementById('verdict-dsc').textContent=data.reasoning||"Verify with primary sources before sharing.";
   document.getElementById('conf-pct').textContent=data.confidence+'%';
   const bar=document.getElementById('conf-bar');
   bar.style.width='0%';
   requestAnimationFrame(()=>requestAnimationFrame(()=>{bar.style.width=data.confidence+'%';}));
 
-  // Use Claude's red_flags as claims if available, else extract from text
   const claims = (data.red_flags && data.red_flags.length > 0)
     ? data.red_flags
     : extractClaims(inputText);
@@ -779,7 +895,7 @@ function updateStats(v){
   stats.total++;
   if(v==='real')stats.real++;
   else if(v==='fake')stats.fake++;
-  else stats.unsure++; // misleading, satire, inconclusive all count as unsure
+  else stats.unsure++;
   document.getElementById('st-total').textContent=stats.total;
   document.getElementById('st-real').textContent=stats.real;
   document.getElementById('st-fake').textContent=stats.fake;
@@ -899,6 +1015,37 @@ function loadHeadline(title){
   setTimeout(()=>{ta.style.borderColor='';},1400);
 }
 function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+// Nav routing
+function navTo(section){
+  // Update active pill
+  document.querySelectorAll('.nav-pill').forEach((p,i)=>{
+    const map=['analyze','history','about'];
+    p.classList.toggle('active', map[i]===section);
+  });
+  if(section==='history'){
+    const hw=document.getElementById('history-wrap');
+    hw.scrollIntoView({behavior:'smooth',block:'start'});
+    // Pulse highlight
+    hw.style.borderColor='rgba(93,123,255,.5)';
+    setTimeout(()=>hw.style.borderColor='',1200);
+  } else if(section==='about'){
+    document.getElementById('about-backdrop').classList.add('show');
+    document.getElementById('about-modal').classList.add('show');
+    document.body.style.overflow='hidden';
+  } else {
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+}
+function closeAbout(){
+  document.getElementById('about-backdrop').classList.remove('show');
+  document.getElementById('about-modal').classList.remove('show');
+  document.body.style.overflow='';
+  // Return active pill to Analyze
+  document.querySelectorAll('.nav-pill').forEach((p,i)=>p.classList.toggle('active',i===0));
+}
+// Close modal on Escape
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeAbout();});
 </script>
 </body>
 </html>
